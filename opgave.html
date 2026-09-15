@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aanmelding jeugdviscursus | HSV De Ruisvoorn</title>
+<meta name="description" content="Meld je kind aan voor de jeugdviscursus van HSV De Ruisvoorn. Eenmalig invullen, dat is alles. Werkt ook offline: de aanmelding wordt bewaard en automatisch verzonden.">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="icon" href="./icons/icon-192.png" type="image/png">
+<meta name="theme-color" content="#1b5e20">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Jeugdviscursus">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="hoofd-kop">
+  <div class="kop-inner">
+    <h1>jeugdviscursus <span>HSV De Ruisvoorn</span></h1>
+  </div>
+</header>
+
+<main class="formulier-wrap">
+  <section class="intro-blok">
+    <h2>Aanmelden is zo geregeld</h2>
+    <p>Leuk dat je kind mee wil doen met de jeugdviscursus! Vul onderstaand formulier in. Na het versturen ontvang je van de cursusleiding een bericht met de cursusdata en het startpunt.</p>
+    <p><strong>Geen verbinding?</strong> Geen probleem — je aanmelding wordt op je telefoon bewaard en automatisch verzonden zodra je weer online bent. Je ziet onder het versturen of je aanmelding al verstuurd is of nog in de wachtrij staat.</p>
+  </section>
+
+  <form id="opgaveForm" novalidate>
+
+    <fieldset>
+      <legend>Gegevens van het kind</legend>
+
+      <div class="veld-groep">
+        <label for="voornaamKind">Voornaam kind <span class="verplicht">*</span></label>
+        <input type="text" id="voornaamKind" name="voornaamKind" autocomplete="given-name" required>
+      </div>
+
+      <div class="veld-groep">
+        <label for="achternaamKind">Achternaam kind <span class="verplicht">*</span></label>
+        <input type="text" id="achternaamKind" name="achternaamKind" autocomplete="family-name" required>
+      </div>
+
+      <div class="veld-groep">
+        <label for="geboortedatumKind">Geboortedatum kind <span class="verplicht">*</span></label>
+        <input type="date" id="geboortedatumKind" name="geboortedatumKind" required>
+      </div>
+
+      <div class="veld-groep">
+        <label for="adres">Adres (straat en huisnummer) <span class="verplicht">*</span></label>
+        <input type="text" id="adres" name="adres" autocomplete="street-address" required>
+      </div>
+
+      <div class="veld-groep">
+        <label for="postcode">Postcode <span class="verplicht">*</span></label>
+        <input type="text" id="postcode" name="postcode" autocomplete="postal-code" required placeholder="1234 AB">
+      </div>
+
+      <div class="veld-groep">
+        <label for="woonplaats">Woonplaats <span class="verplicht">*</span></label>
+        <input type="text" id="woonplaats" name="woonplaats" autocomplete="address-level2" required>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Gegevens van de ouder of verzorger</legend>
+
+      <div class="veld-groep">
+        <label for="naamOuder">Naam ouder/verzorger <span class="verplicht">*</span></label>
+        <input type="text" id="naamOuder" name="naamOuder" autocomplete="name" required>
+      </div>
+
+      <div class="veld-groep">
+        <label for="telefoonOuder">Telefoonnummer <span class="verplicht">*</span></label>
+        <input type="tel" id="telefoonOuder" name="telefoonOuder" autocomplete="tel" required>
+      </div>
+
+      <div class="veld-groep">
+        <label for="emailOuder">E-mailadres <span class="verplicht">*</span></label>
+        <input type="email" id="emailOuder" name="emailOuder" autocomplete="email" required>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Lidmaatschap</legend>
+
+      <div class="veld-groep">
+        <label for="lid">Is het kind lid van de vereniging? <span class="verplicht">*</span></label>
+        <select id="lid" name="lid" required>
+          <option value="">Kies...</option>
+          <option value="ja">Ja</option>
+          <option value="nee">Nee</option>
+        </select>
+      </div>
+
+      <div class="veld-groep" id="lidnummerBlok" hidden>
+        <label for="lidnummer">Lidmaatschaps-/vispasnummer</label>
+        <input type="text" id="lidnummer" name="lidnummer" autocomplete="off">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Ervaring en bijzonderheden</legend>
+
+      <div class="veld-groep">
+        <span class="veld-label">Heeft het kind eerder gevist? <span class="verplicht">*</span></span>
+        <div class="radio-lijst">
+          <label class="radio-optie"><input type="radio" name="eerderGevist" value="ja" required> Ja</label>
+          <label class="radio-optie"><input type="radio" name="eerderGevist" value="nee" required> Nee</label>
+        </div>
+      </div>
+
+      <div class="veld-groep">
+        <span class="veld-label">Doet het kind voor het eerst mee aan de cursus? <span class="verplicht">*</span></span>
+        <div class="radio-lijst">
+          <label class="radio-optie"><input type="radio" name="eersteKeer" value="ja" required> Ja, voor het eerst</label>
+          <label class="radio-optie"><input type="radio" name="eersteKeer" value="nee" required> Nee, al vaker</label>
+        </div>
+      </div>
+
+      <div class="veld-groep">
+        <label for="allergie">Allergie, dieet of bijzonderheden? <span class="verplicht">*</span></label>
+        <select id="allergie" name="allergie" required>
+          <option value="">Kies...</option>
+          <option value="geen">Geen</option>
+          <option value="allergie">Ja, namelijk (vul hieronder in)</option>
+          <option value="dieet">Ja, dieet (vul hieronder in)</option>
+        </select>
+      </div>
+
+      <div class="veld-groep" id="allergieDetailsBlok" hidden>
+        <label for="allergieDetails">Toelichting allergie/dieet/bijzonderheden</label>
+        <textarea id="allergieDetails" name="allergieDetails" rows="3"></textarea>
+      </div>
+
+      <div class="veld-groep">
+        <label for="opmerking">Opmerkingen</label>
+        <textarea id="opmerking" name="opmerking" rows="3" placeholder="Niet verplicht. Bijvoorbeeld vervoer, begeleiding, bijzonderheden."></textarea>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Toestemming en akkoord</legend>
+
+      <div class="veld-groep">
+        <span class="veld-label">Mogen er tijdens de cursus foto's worden gemaakt? <span class="verplicht">*</span></span>
+        <div class="radio-lijst">
+          <label class="radio-optie"><input type="radio" name="fotoGemaakt" value="ja" required> Ja, foto's zijn goed</label>
+          <label class="radio-optie"><input type="radio" name="fotoGemaakt" value="nee" required> Nee, liever niet</label>
+        </div>
+        <p class="hulp-tekst">Foto's worden alleen gebruikt voor onze eigen openingspagina en sociale media van de vereniging.</p>
+      </div>
+
+      <div class="veld-groep">
+        <label class="akkoord-optie">
+          <input type="checkbox" id="avgAkkoord" name="avgAkkoord" required>
+          <span>Ik ga ermee akkoord dat HSV De Ruisvoorn de door mij ingevulde gegevens gebruikt om de jeugdviscursus te organiseren, conform de AVG. <span class="verplicht">*</span></span>
+        </label>
+      </div>
+
+    </fieldset>
+
+    <div class="verstuur-balk">
+      <button type="submit" id="verstuurBtn" class="verstuur-knop">Aanmelding versturen</button>
+      <p class="wachtrij-strategie" id="statusTekst">Nog niet verzonden.</p>
+    </div>
+
+  </form>
+</main>
+
+<footer class="voet">
+  <p><a href="./index.html">Terug naar de homepage</a></p>
+</footer>
+
+<script src="./opgave.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# Config-bestanden + OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Chrome-testprofiel + integratietestsporen (nooit committen)
+test/
+
+# Icons worden uit PNG gegenereerd; niet her-committen
