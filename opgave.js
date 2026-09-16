@@ -20,7 +20,7 @@
 
 "use strict";
 
-var BACKEND_URL = ""https://script.google.com/macros/s/AKfycbzcsbXBWubsKemzmYDir8Z02Fo_QYYCY7t7jFrLn_SJebC9YoNYuidW-EKQ9T-qV8LJ/exec" */
+var BACKEND_URL = ""https://script.google.com/macros/s/AKfycbzcsbXBWubsKemzmYDir8Z02Fo_QYYCY7t7jFrLn_SJebC9YoNYuidW-EKQ9T-qV8LJ/exec"
 
 var WACHTRIJ_SLEUTEL = "wachtrijOpgave";
 
