@@ -89,7 +89,7 @@ function doPost(e) {
         .setFontColor("#ffffff");
   }
 
-  blad.appendRow(rijlets);
+  blad.appendRow(rij);
 
   return ContentService.createTextOutput(
     JSON.stringify({
