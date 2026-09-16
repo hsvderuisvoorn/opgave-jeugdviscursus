@@ -20,7 +20,7 @@
 
 "use strict";
 
-var BACKEND_URL = "https://script.google.com/macros/s/AKfycbzrgtAxW92KoqyyySCePA-drRh0Nn1tFrWmdUW_iyGixoSV0802t9RlTOvOFu9CVH8/exec";
+var BACKEND_URL = "https://script.google.com/macros/s/AKfycbxb-6J_XTYgIAFWNWnNkNKtE5SVlo6tfSlxYP8pRSsjoR0hA6Mrqbg8KFhIW6Xwhg/exec";
 
 var WACHTRIJ_SLEUTEL = "wachtrijOpgave";
 
@@ -146,6 +146,7 @@ function verzamelAanmelding() {
     opmerking:      waarde("opmerking"),
     fotoGemaakt:    radioWaarde("fotoGemaakt"),
     avgAkkoord:     checkbox("avgAkkoord"),
+    whatsappGroep:  radioWaarde("whatsappGroep"),
     datumAanmelding: new Date().toISOString()
   };
 }
