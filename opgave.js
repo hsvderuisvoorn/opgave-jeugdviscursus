@@ -94,7 +94,7 @@ function verstuurWachtrij() {
     var geslaagd = resultaten.reduce(function (a, b) { return a + b; }, 0);
     if (geslaagd > 0 && !haalWachtrij().length) {
       toonStatus("Je aanmelding" + (geslaagd > 1 ? "en" : "") +
-        " is verstuurd. Bedankt!", "ok");
+        "Bedankt voor de aanmelding! Uw aanmelding is in goede orde ontvangen en zal worden verwerkt door onze jeugdafdeling. Zodra alle opgaves binnen zijn hoort u pas weer van ons. Heeft u in de tussentijd vragen stuur die dan naar secretariaat@hsvderuisvoorn.nl", "ok"), "ok");
       resetFormulier();
     }
     return geslaagd;
@@ -175,7 +175,7 @@ function verstuurFormulier(e) {
 
   toonStatus("Aanmelding wordt verstuurd...", "info");
   verstuurAanmelding(aanmelding).then(function () {
-    toonStatus("Je aanmelding is verstuurd. Bedankt! Je hoort van ons vanzelf.", "ok");
+    toonStatus("Bedankt voor de aanmelding! Uw aanmelding is in goede orde ontvangen en zal worden verwerkt door onze jeugdafdeling. Zodra alle opgaves binnen zijn, hoort u pas weer van ons. Heeft u in de tussentijd vragen? Stuur die dan naar secretariaat@hsvderuisvoorn.nl", "ok");
     resetFormulier();
   }).catch(function () {
     aanmelding.wachtrijId = "op-" + Date.now() + "-" +
