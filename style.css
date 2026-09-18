@@ -64,6 +64,10 @@ form#opgaveForm { margin: 0; }
   margin: 0 0 1rem 0;
   padding: 0; /* padding op legend/innerlijke groepen */
 }
+fieldset legend {
+  font-weight: 700;
+}
+
 .veld-set legend {
   font-weight: 700;
   color: var(--hoofd-groen);
