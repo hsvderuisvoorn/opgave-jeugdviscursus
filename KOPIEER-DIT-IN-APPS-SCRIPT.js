@@ -54,7 +54,7 @@ function doPost(e) {
     new Date(),                                   /* A: datum/tijd opgave      */
     json.voornaamKind        || "",               /* B: voornaam kind          */
     json.achternaamKind      || "",               /* C: achternaam kind        */
-    json.geboortedatumKind   || "",               /* D: geboortedatum kind     */
+    json.geboorteDatumKind   || "",               /* D: geboortedatum kind     */
     json.adres               || "",               /* E: adres                  */
     json.postcode            || "",               /* F: postcode               */
     json.woonplaats          || "",               /* G: woonplaats             */
@@ -70,6 +70,7 @@ function doPost(e) {
     json.opmerking           || "",               /* Q: opmerkingen            */
     json.fotoGemaakt         || "",               /* R: foto's mogen?          */
     json.avgAkkoord        === true ? "ja" : "nee", /* S: AVG-akkoord         */
+    json.whatsappGroep       || "",               /* whatsapp-groep keuze     */
     json.datumAanmelding     || ""                /* T: datum opgave (ISO)     */
   ];
 
@@ -82,7 +83,7 @@ function doPost(e) {
           "Telefoon", "E-mail", "Lid vereniging", "Lidmaatschapsnr",
           "Eerder gevist", "Eerste keer cursus", "Allergie",
           "Toelichting allergie", "Opmerkingen", "Foto's toegestaan",
-          "AVG-akkoord", "Datum opgave (ISO)"
+          "AVG-akkoord", "Whatsapp-groep", "Datum opgave (ISO)"
         ]])
         .setFontWeight("bold")
         .setBackground("#1b5e20")

@@ -44,8 +44,9 @@
       </div>
 
       <div class="veld-groep">
-        <label for="geboortedatumKind">Geboortedatum kind <span class="verplicht">*</span></label>
-        <input type="date" id="geboortedatumKind" name="geboortedatumKind" required>
+        <label for="geboorteDatumKind">Geboortedatum kind <span class="verplicht">*</span></label>
+        <input type="date" id="geboorteDatumKind" name="geboorteDatumKind" required>
+        <p id="leeftijdMelding" class="veld-fout" hidden>Opgave is niet mogelijk: dit kind is op 1 januari van het cursusjaar al 14 jaar. Het kind mag op 1 januari van het cursusjaar nog geen 14 jaar zijn.</p>
       </div>
 
       <div class="veld-groep">
@@ -87,15 +88,14 @@
       <legend>Lidmaatschap</legend>
 
       <div class="veld-groep">
-        <label for="lid">Is het kind lid van de vereniging? <span class="verplicht">*</span></label>
-        <select id="lid" name="lid" required>
-          <option value="">Kies...</option>
-          <option value="ja">Ja</option>
-          <option value="nee">Nee</option>
-        </select>
+        <span class="veld-label">Is het kind lid van de vereniging? <span class="verplicht">*</span></span>
+        <div class="radio-lijst">
+          <label class="radio-optie"><input type="radio" name="lid" value="ja" required> Ja</label>
+          <label class="radio-optie"><input type="radio" name="lid" value="nee" required> Nee</label>
+        </div>
       </div>
 
-      <div class="veld-groep" id="lidnummerBlok" hidden>
+      <div class="veld-groep" id="lidGroep" hidden>
         <label for="lidnummer">Lidmaatschaps-/vispasnummer</label>
         <input type="text" id="lidnummer" name="lidnummer" autocomplete="off">
       </div>
@@ -121,17 +121,16 @@
       </div>
 
       <div class="veld-groep">
-        <label for="allergie">Allergie, dieet of bijzonderheden? <span class="verplicht">*</span></label>
-        <select id="allergie" name="allergie" required>
-          <option value="">Kies...</option>
-          <option value="geen">Geen</option>
-          <option value="allergie">Ja, namelijk (vul hieronder in)</option>
-          <option value="dieet">Ja, dieet (vul hieronder in)</option>
-        </select>
+        <span class="veld-label">Allergie, ADHD of andere bijzonderheden? <span class="verplicht">*</span></span>
+        <div class="radio-lijst">
+          <label class="radio-optie"><input type="radio" name="allergie" value="geen" required> Geen</label>
+          <label class="radio-optie"><input type="radio" name="allergie" value="allergie" required> Ja, namelijk (vul hieronder in)</label>
+        </div>
+        <p class="hulp-tekst">HSV De Ruisvoorn heeft al jaren ervaring met bijzonderheden en gaat zeer vertrouwelijk om met de ingevulde gegevens.</p>
       </div>
 
-      <div class="veld-groep" id="allergieDetailsBlok" hidden>
-        <label for="allergieDetails">Toelichting allergie/dieet/bijzonderheden</label>
+      <div class="veld-groep" id="allergieGroep" hidden>
+        <label for="allergieDetails">Toelichting allergie/dieet/bijzonderheden <span class="verplicht">*</span></label>
         <textarea id="allergieDetails" name="allergieDetails" rows="3"></textarea>
       </div>
 
@@ -181,6 +180,15 @@
     </div>
 
   </form>
+
+  <section id="bedanktPagina" class="bedankt-pagina" hidden>
+    <div class="bedankt-inhoud">
+      <h2>Bedankt voor de aanmelding!</h2>
+      <p>Uw aanmelding is in goede orde ontvangen en zal worden verwerkt door onze jeugdafdeling. Zodra alle opgaves binnen zijn hoort u pas weer van ons.</p>
+      <p>Heeft u in de tussentijd vragen? Stuur die dan naar <a href="mailto:secretariaat@hsvderuisvoorn.nl">secretariaat@hsvderuisvoorn.nl</a>.</p>
+      <p><a href="./index.html">Terug naar de homepage</a></p>
+    </div>
+  </section>
 </main>
 
 <footer class="voet">

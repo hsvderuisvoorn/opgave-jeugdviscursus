@@ -54,7 +54,7 @@ function doPost(e) {
     new Date(),                                   /* A: datum/tijd opgave      */
     json.voornaamKind        || "",               /* B: voornaam kind          */
     json.achternaamKind      || "",               /* C: achternaam kind        */
-    json.geboortedatumKind   || "",               /* D: geboortedatum kind     */
+    json.geboorteDatumKind   || "",               /* D: geboortedatum kind     */
     json.adres               || "",               /* E: adres                  */
     json.postcode            || "",               /* F: postcode               */
     json.woonplaats          || "",               /* G: woonplaats             */

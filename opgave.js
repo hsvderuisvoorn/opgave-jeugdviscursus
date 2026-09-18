@@ -20,7 +20,36 @@
 
 "use strict";
 
-var BACKEND_URL = "https://script.google.com/macros/s/AKfycbxKwfwfjpRn53YqjdTmR-f3YFwe1kcnlXKtWgeRbYTXwVWo0YL7DSGShbgbmliMjAs/exec";
+/* ============================================================
+   BELANGRIJK — CURSUSJAAR (elk jaar op slechts ÉÉN plek aanpassen)
+   Hieronder staat op regel 24 het jaartal van de cursus.
+   Dit jaartal wordt automatisch getoond in de paginatitel en
+   in de grote kop (H1) van opgave.html. Verander alleen deze
+   regel, en overal verschijnt het nieuwe jaartal vanzelf.
+   ============================================================ */
+var CURSUSJAAR = "2027";
+
+/* ============================================================
+   LEEFTIJDSGRENS (automatisch gebaseerd op CURSUSJAAR - 14)
+   Regel: het kind mag op 1 januari van het cursusjaar nog
+   GEEN 14 jaar zijn. De grens met het jaar wordt dus berekend
+   uit CURSUSJAAR; u hoeft hier niets aan te passen.
+   ============================================================ */
+function controleerLeeftijd() {
+  var veld = document.getElementById("geboorteDatumKind");
+  var melding = document.getElementById("leeftijdMelding");
+  if (!veld) { return true; }
+  var datum = veld.value;
+  if (!datum) { if (melding) { melding.hidden = true; } return true; }
+  var grens = (parseInt(CURSUSJAAR, 10) - 14) + "-01-01";
+  var teOud = datum <= grens;
+  if (melding) { melding.hidden = !teOud; }
+  if (teOud && veld) { veld.focus(); }
+  return !teOud;
+}
+
+
+var BACKEND_URL = "https://script.google.com/macros/s/AKfycbwqV8dxK5EdYV66U-9qCxidql_t5aE7hH3cp-hIJ_IcMZ_uJ8zOWIARVO4k21awKw/exec";
 
 var WACHTRIJ_SLEUTEL = "wachtrijOpgave";
 
@@ -53,6 +82,17 @@ function toonStatus(tekst, soort) {
   if (soort === "ok")   { el.classList.add("status-ok"); }
   if (soort === "fout") { el.classList.add("status-fout"); }
   if (soort === "info") { el.classList.add("status-info"); }
+}
+
+/* ------------------------------------------------------------
+   Bedanktpagina tonen na een succesvolle verzending
+   ------------------------------------------------------------ */
+function toonBedanktPagina() {
+  var form = document.getElementById("opgaveForm");
+  var sectie = document.getElementById("bedanktPagina");
+  if (sectie) { sectie.hidden = false; }
+  if (form)   { form.hidden = true;  }
+  window.scrollTo(0, 0);
 }
 
 /* ------------------------------------------------------------
@@ -94,7 +134,7 @@ function verstuurWachtrij() {
     var geslaagd = resultaten.reduce(function (a, b) { return a + b; }, 0);
     if (geslaagd > 0 && !haalWachtrij().length) {
       toonStatus("Je aanmelding" + (geslaagd > 1 ? "en" : "") +
-        "Bedankt voor de aanmelding! Uw aanmelding is in goede orde ontvangen en zal worden verwerkt door onze jeugdafdeling. Zodra alle opgaves binnen zijn hoort u pas weer van ons. Heeft u in de tussentijd vragen stuur die dan naar secretariaat@hsvderuisvoorn.nl", "ok"), "ok");
+        "Bedankt voor de aanmelding! Uw aanmelding is in goede orde ontvangen en zal worden verwerkt door onze jeugdafdeling. Zodra alle opgaves binnen zijn hoort u pas weer van ons. Heeft u in de tussentijd vragen stuur die dan naar secretariaat@hsvderuisvoorn.nl", "ok");
       resetFormulier();
     }
     return geslaagd;
@@ -130,7 +170,7 @@ function verzamelAanmelding() {
     type: "aanmelding-jeugdviscursus",
     voornaamKind:   waarde("voornaamKind"),
     achternaamKind: waarde("achternaamKind"),
-    geboortedatumKind: waarde("geboortedatumKind"),
+    geboorteDatumKind: waarde("geboorteDatumKind"),
     adres:          waarde("adres"),
     postcode:       waarde("postcode"),
     woonplaats:     waarde("woonplaats"),
@@ -162,6 +202,11 @@ function verstuurFormulier(e) {
     return;
   }
 
+  if (!controleerLeeftijd()) {
+    toonStatus("Opgave is niet mogelijk: dit kind is op 1 januari van het jaar van deelname al 14 jaar. Het kind mag op 1 januari van het cursusjaar nog geen 14 jaar zijn.", "fout");
+    return;
+  }
+
   var aanmelding = verzamelAanmelding();
 
   if (!BACKEND_URL) {
@@ -175,7 +220,7 @@ function verstuurFormulier(e) {
 
   toonStatus("Aanmelding wordt verstuurd...", "info");
   verstuurAanmelding(aanmelding).then(function () {
-    toonStatus("Bedankt voor de aanmelding! Uw aanmelding is in goede orde ontvangen en zal worden verwerkt door onze jeugdafdeling. Zodra alle opgaves binnen zijn, hoort u pas weer van ons. Heeft u in de tussentijd vragen? Stuur die dan naar secretariaat@hsvderuisvoorn.nl", "ok");
+    toonBedanktPagina();
     resetFormulier();
   }).catch(function () {
     aanmelding.wachtrijId = "op-" + Date.now() + "-" +
@@ -194,6 +239,17 @@ function koppelKlaarzetten() {
   form.addEventListener("submit", verstuurFormulier);
   form.noValidate = true;
 
+  /* leeftijdscontrole direct bij het verlaten van het geboortedatumveld */
+  var gebDatumVeld = document.getElementById("geboorteDatumKind");
+  if (gebDatumVeld) {
+    gebDatumVeld.addEventListener("blur", function () {
+      controleerLeeftijd();
+    });
+    gebDatumVeld.addEventListener("change", function () {
+      controleerLeeftijd();
+    });
+  }
+
   /* lid = ja -> lidnummer tonen */
   var lidGroep = document.getElementById("lidGroep");
   var lidJN    = document.querySelector('input[name="lid"]');
@@ -207,11 +263,14 @@ function koppelKlaarzetten() {
     });
   }
 
-  /* allergie = ja/dieet -> details tonen */
+  /* allergie = ja/dieet -> details tonen en verplicht maken */
   var allergieGroep = document.getElementById("allergieGroep");
+  var allergieDetails = document.getElementById("allergieDetails");
   function toonAllergie() {
     var gekozen = document.querySelector('input[name="allergie"]:checked');
-    if (allergieGroep) { allergieGroep.hidden = !(gekozen && gekozen.value !== "geen"); }
+    var verplicht = !!(gekozen && gekozen.value !== "geen");
+    if (allergieGroep) { allergieGroep.hidden = !verplicht; }
+    if (allergieDetails) { allergieDetails.required = verplicht; }
   }
   document.querySelectorAll('input[name="allergie"]').forEach(function (r) {
     r.addEventListener("change", toonAllergie);

@@ -167,6 +167,17 @@ button#verstuurBtn:disabled {
 }
 #statusTekst.zichtbaar { display: block; }
 #statusTekst.fout { background: #fbe4e2; border: 1px solid #f3b5b1; color: var(--fout); }
+
+.veld-fout {
+  margin-top: 0.4rem;
+  font-size: 0.88rem;
+  color: var(--fout);
+  background: #fbe4e2;
+  border-left: 3px solid var(--fout);
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.3rem;
+}
+.veld-fout[hidden] { display: none; }
 #statusTekst.ok   { background: #e4f2de; border: 1px solid #bcd8af; color: var(--ok); }
 #statusTekst.info { background: #e4edfa; border: 1px solid #b7cceb; color: var(--info); }
 
