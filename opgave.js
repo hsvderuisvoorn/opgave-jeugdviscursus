@@ -49,7 +49,7 @@ function controleerLeeftijd() {
 }
 
 
-var BACKEND_URL = "https://script.google.com/macros/s/AKfycbwqV8dxK5EdYV66U-9qCxidql_t5aE7hH3cp-hIJ_IcMZ_uJ8zOWIARVO4k21awKw/exec";
+var BACKEND_URL = "https://script.google.com/macros/s/AKfycbwYSbUYsT3qT_nU3Lm107WEf9D4eAjmg6XVHzNn9_LdKZ1-gj3Lfa3Vf2V_SyKilyE0/exec";
 
 var WACHTRIJ_SLEUTEL = "wachtrijOpgave";
 
