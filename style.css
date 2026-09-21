@@ -185,6 +185,32 @@ button#verstuurBtn:disabled {
 #statusTekst.ok   { background: #e4f2de; border: 1px solid #bcd8af; color: var(--ok); }
 #statusTekst.info { background: #e4edfa; border: 1px solid #b7cceb; color: var(--info); }
 
+/* ================= BEDANKTPAGINA ================= */
+.bedankt-pagina { margin-top: 1.5rem; }
+.bedankt-inhoud {
+  background: var(--wit);
+  border: 1px solid var(--rand);
+  border-radius: 0.6rem;
+  padding: 2rem 1.5rem;
+}
+.bedankt-titel {
+  color: var(--hoofd-groen);
+  font-size: 1.7rem;
+  font-weight: 800;
+  margin: 0 0 1.4rem;
+  text-align: center;
+}
+.bedankt-inhoud > p { margin: 0 0 1rem; }
+.belangrijk {
+  background: #fff7e0;
+  border-left: 4px solid #e0a800;
+  border-radius: 0.35rem;
+  padding: 0.7rem 0.9rem;
+  margin: 0 0 1rem;
+  font-size: 0.98rem;
+}
+.belangrijk p { margin: 0; }
+
 /* ================= VOET ================= */
 .voet {
   text-align: center;

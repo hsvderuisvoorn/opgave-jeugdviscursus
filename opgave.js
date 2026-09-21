@@ -134,7 +134,7 @@ function verstuurWachtrij() {
     var geslaagd = resultaten.reduce(function (a, b) { return a + b; }, 0);
     if (geslaagd > 0 && !haalWachtrij().length) {
       toonStatus("Je aanmelding" + (geslaagd > 1 ? "en" : "") +
-        "Bedankt voor de aanmelding! Uw aanmelding is in goede orde ontvangen en zal worden verwerkt door onze jeugdafdeling. Zodra alle opgaves binnen zijn hoort u pas weer van ons. Heeft u in de tussentijd vragen stuur die dan naar secretariaat@hsvderuisvoorn.nl", "ok");
+        " is verstuurd: Bedankt voor de aanmelding! Uw aanmelding is in goede orde ontvangen en zal worden verwerkt door onze jeugdafdeling. Let op: dit betekent niet automatisch dat uw kind ook daadwerkelijk kan deelnemen aan de jeugdviscursus. Zodra alle opgaves verwerkt zijn hoort u van ons of de deelname is bevestigd. Heeft u in de tussentijd vragen stuur die dan naar secretariaat@hsvderuisvoorn.nl", "ok");
       resetFormulier();
     }
     return geslaagd;
