@@ -179,7 +179,7 @@ function verstuurOnverzondenMails() {
     try {
       var kind = escHtml([r[1], r[2]].join(" ").trim()) || "onbekend kind";
       MailApp.sendEmail({
-        to: "paul@hsvderuisvoorn.nl",
+        to: "secretariaat@hsvderuisvoorn.nl",
         subject: "Nieuwe opgave jeugdviscursus: " + kind,
         htmlBody:
           "<p>Er is een nieuwe aanmelding voor de jeugdviscursus geregistreerd:</p>" +
