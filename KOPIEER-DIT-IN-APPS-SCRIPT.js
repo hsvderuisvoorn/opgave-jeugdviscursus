@@ -92,6 +92,8 @@ function doPost(e) {
 
   blad.appendRow(rij);
 
+  stuurOpgaveMelding(json, blad);
+
   return ContentService.createTextOutput(
     JSON.stringify({
       ok: true,
@@ -152,6 +154,47 @@ function verplaatsNaarMap(bestand, mapNaam) {
   var map = zoeker.next();
 
   bestandsGids.moveTo(map);
+}
+
+/* ------------------------------------------------------------
+   Mailt de cursusleiding bij elke nieuwe aanmelding, met een
+   directe link naar de spreadsheet. Verzonden vanaf het account
+   waaronder de web-app draait (Uitvoeren als: Ik). Een eventuele
+   faal mag de aanmelding zelf nooit blokkeren.
+   ------------------------------------------------------------ */
+function stuurOpgaveMelding(json, blad) {
+  try {
+    var kind = escHtml(
+      [(json.voornaamKind || ""), (json.achternaamKind || "")].join(" ").trim()
+    ) || "onbekend kind";
+    var link = "https://docs.google.com/spreadsheets/d/" + blad.getParent().getId() + "/edit";
+    MailApp.sendEmail({
+      to: "paul@hsvderuisvoorn.nl",
+      subject: "Nieuwe opgave jeugdviscursus: " + kind,
+      htmlBody:
+        "<p>Er is een nieuwe aanmelding voor de jeugdviscursus geregistreerd:</p>" +
+        "<ul>" +
+        "<li><strong>Kind:</strong> " + kind + "</li>" +
+        "<li><strong>Geboortedatum:</strong> " + escHtml(json.geboorteDatumKind) + "</li>" +
+        "<li><strong>Ouder/verzorger:</strong> " + escHtml(json.naamOuder) + "</li>" +
+        "<li><strong>Telefoon:</strong> " + escHtml(json.telefoonOuder) + "</li>" +
+        "<li><strong>E-mail:</strong> " + escHtml(json.emailOuder) + "</li>" +
+        "<li><strong>Woonplaats:</strong> " + escHtml(json.woonplaats) + "</li>" +
+        "<li><strong>Opgegeven op:</strong> " + escHtml(json.datumAanmelding) + "</li>" +
+        "</ul>" +
+        "<p>Bekijk de aanmelding in de spreadsheet: <a href=\"" + link + "\">" + link + "</a></p>"
+    });
+  } catch (err) {
+    // stille fout: aanmelding staat al in de sheet, geen mail mag de opgave blokkeren
+  }
+}
+
+function escHtml(s) {
+  return String(s || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 /* ------------------------------------------------------------
