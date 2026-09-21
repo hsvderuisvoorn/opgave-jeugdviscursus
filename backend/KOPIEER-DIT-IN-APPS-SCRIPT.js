@@ -92,14 +92,10 @@ function doPost(e) {
 
   blad.appendRow(rij);
 
-  var mailStatus = stuurOpgaveMelding(json, blad);
-
   return ContentService.createTextOutput(
     JSON.stringify({
       ok: true,
-      rij: rij.length,
-      rij_id: json.wachtrijId || null,
-      mail: mailStatus
+      rij: rij.length
     })
   ).setMimeType(ContentService.MimeType.JSON);
 }
@@ -158,38 +154,55 @@ function verplaatsNaarMap(bestand, mapNaam) {
 }
 
 /* ------------------------------------------------------------
-   Mailt de cursusleiding bij elke nieuwe aanmelding, met een
-   directe link naar de spreadsheet. Verzonden vanaf het account
-   waaronder de web-app draait (Uitvoeren als: Ik). Een eventuele
-   faal mag de aanmelding zelf nooit blokkeren. Retourneert een
-   korte statustekst zodat het resultaat te controleren is.
+   MAIL VIA TIMER (niet via de web-app)
+   ------------------------------------------------------------
+   De web-app zelf mag geen mail versturen: een anonieme POST kan
+   de benodigde "script.send_mail"-toestemming niet ophalen. Daarom
+   wordt het mailen gedaan door deze functie, die je als timer in
+   de editor instelt (bijv. elke 5 minuten). Ze ziet wél elke mail
+   met behulp van kolom U ("Mail verstuurd"): rijen zonder "ja"
+   krijgen hun melding toegestuurd en worden daarna gemarkeerd.
    ------------------------------------------------------------ */
-function stuurOpgaveMelding(json, blad) {
-  try {
-    var kind = escHtml(
-      [(json.voornaamKind || ""), (json.achternaamKind || "")].join(" ").trim()
-    ) || "onbekend kind";
-    var link = "https://docs.google.com/spreadsheets/d/" + blad.getParent().getId() + "/edit";
-    MailApp.sendEmail({
-      to: "paul@hsvderuisvoorn.nl",
-      subject: "Nieuwe opgave jeugdviscursus: " + kind,
-      htmlBody:
-        "<p>Er is een nieuwe aanmelding voor de jeugdviscursus geregistreerd:</p>" +
-        "<ul>" +
-        "<li><strong>Kind:</strong> " + kind + "</li>" +
-        "<li><strong>Geboortedatum:</strong> " + escHtml(json.geboorteDatumKind) + "</li>" +
-        "<li><strong>Ouder/verzorger:</strong> " + escHtml(json.naamOuder) + "</li>" +
-        "<li><strong>Telefoon:</strong> " + escHtml(json.telefoonOuder) + "</li>" +
-        "<li><strong>E-mail:</strong> " + escHtml(json.emailOuder) + "</li>" +
-        "<li><strong>Woonplaats:</strong> " + escHtml(json.woonplaats) + "</li>" +
-        "<li><strong>Opgegeven op:</strong> " + escHtml(json.datumAanmelding) + "</li>" +
-        "</ul>" +
-        "<p>Bekijk de aanmelding in de spreadsheet: <a href=\"" + link + "\">" + link + "</a></p>"
-    });
-    return "verzonden";
-  } catch (err) {
-    // stille fout: aanmelding staat al in de sheet, geen mail mag de opgave blokkeren
-    return "FOUT: " + err;
+function verstuurOnverzondenMails() {
+  var blad = koppelSpreadsheet().blad;
+  var data = blad.getDataRange().getValues();
+  var link = "https://docs.google.com/spreadsheets/d/" + blad.getParent().getId() + "/edit";
+  var verzonden = 0;
+
+  if (!blad.getRange(1, 21).getValue()) {
+    blad.getRange(1, 21).setValue("Mail verstuurd");
+  }
+
+  for (var i = 1; i < data.length; i++) {
+    var r = data[i];
+    if (String(r[20]) === "ja") continue; /* kolom U al gemarkeerd */
+    try {
+      var kind = escHtml([r[1], r[2]].join(" ").trim()) || "onbekend kind";
+      MailApp.sendEmail({
+        to: "paul@hsvderuisvoorn.nl",
+        subject: "Nieuwe opgave jeugdviscursus: " + kind,
+        htmlBody:
+          "<p>Er is een nieuwe aanmelding voor de jeugdviscursus geregistreerd:</p>" +
+          "<ul>" +
+          "<li><strong>Kind:</strong> " + kind + "</li>" +
+          "<li><strong>Geboortedatum:</strong> " + escHtml(r[3]) + "</li>" +
+          "<li><strong>Ouder/verzorger:</strong> " + escHtml(r[7]) + "</li>" +
+          "<li><strong>Telefoon:</strong> " + escHtml(r[8]) + "</li>" +
+          "<li><strong>E-mail:</strong> " + escHtml(r[9]) + "</li>" +
+          "<li><strong>Woonplaats:</strong> " + escHtml(r[6]) + "</li>" +
+          "<li><strong>Opgegeven op:</strong> " + escHtml(r[19]) + "</li>" +
+          "</ul>" +
+          "<p>Bekijk de aanmelding in de spreadsheet: <a href=\"" + link + "\">" + link + "</a></p>"
+      });
+      blad.getRange(i + 1, 21).setValue("ja");
+      verzonden++;
+    } catch (err) {
+      /* een kapotte rij mag de rest niet stoppen */
+    }
+  }
+
+  if (verzonden > 0) {
+    Logger.log("verstuurOnverzondenMails: " + verzonden + " mail(s) verstuurd");
   }
 }
 
