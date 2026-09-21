@@ -117,6 +117,7 @@ function koppelSpreadsheet() {
   if (!bestand) {
     /* geen gekoppelde spreadsheet: maak er een bij de webapp */
     bestand = SpreadsheetApp.create("Aanmeldingen jeugdviscursus");
+    verplaatsNaarMap(bestand, "Opgave jeugdcursus");
   }
 
   var blad = bestand.getSheetByName("Aanmeldingen");
@@ -131,6 +132,26 @@ function koppelSpreadsheet() {
     blad: blad,
     nieuwGemaakt: nieuwGemaakt
   };
+}
+
+/* ------------------------------------------------------------
+   Zet de spreadsheet in de opgegeven map op het Workspace-account
+   (bijv. "Opgave jeugdcursus"). Wordt aangeroepen bij nieuwe
+   spreadsheets, zodat ze niet in de persoonlijke root-drive
+   achterblijven. Maakt de map zelf aan als die nog niet bestaat.
+   ------------------------------------------------------------ */
+function verplaatsNaarMap(bestand, mapNaam) {
+  var bestandsId = bestand.getId();
+  var bestandsGids = DriveApp.getFileById(bestandsId);
+
+  var zoeker = DriveApp.getFoldersByName(mapNaam);
+  if (!zoeker.hasNext()) {
+    DriveApp.createFolder(mapNaam);
+    zoeker = DriveApp.getFoldersByName(mapNaam);
+  }
+  var map = zoeker.next();
+
+  bestandsGids.moveTo(map);
 }
 
 /* ------------------------------------------------------------
