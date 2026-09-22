@@ -34,8 +34,8 @@
    ============================================================ */
 
 var MELDINGADRESSEN = [
-  "ledenadministratie@hsvderuisvoorn.nl",
-  "deruisvoornhelden@gmail.com"
+  "secretariaat@hsvderuisvoorn.nl",
+  "ledenadministratie@hsvderuisvoorn.nl"
 ];
 
 /* ------------------------------------------------------------
