@@ -149,8 +149,6 @@ function verplaatsNaarMap(bestand, mapNaam) {
 function verstuurOnverzondenMails() {
   var blad = koppelSpreadsheet().blad;
   var data = blad.getDataRange().getValues();
-  var link = "https://docs.google.com/spreadsheets/d/" +
-             blad.getParent().getId() + "/edit";
 
   for (var i = 1; i < data.length; i++) {
     var r = data[i];
@@ -158,23 +156,24 @@ function verstuurOnverzondenMails() {
 
     try {
       var kind = escHtml([r[1], r[2]].join(" ").trim()) || "onbekend kind";
+      var gebDatum = datumAlsTekst(r[3]);
+      var opgDatum = datumAlsTekst(r[20]);
       if (MELDINGADRESSEN.length > 0) {
+        var tekst =
+          "Er is een nieuwe opgave voor de jeugdviscursus geregistreerd.\n\n" +
+          "Kind: " + kind + "\n" +
+          "Geboortedatum: " + gebDatum + "\n" +
+          "Ouder/verzorger: " + r[7] + "\n" +
+          "Telefoon: " + r[8] + "\n" +
+          "E-mail: " + r[9] + "\n" +
+          "Woonplaats: " + r[6] + "\n" +
+          "Opgegeven op: " + opgDatum + "\n" +
+          "\nAlle aanmeldingen staan in de spreadsheet 'Opgaves jeugdVIScursus' (tabblad Aanmeldingen).";
         for (var a = 0; a < MELDINGADRESSEN.length; a++) {
           MailApp.sendEmail({
             to: MELDINGADRESSEN[a],
             subject: "Nieuwe opgave jeugdviscursus: " + kind,
-            htmlBody:
-              "<p>Er is een nieuwe aanmelding voor de jeugdviscursus geregistreerd:</p>" +
-              "<ul>" +
-              "<li><strong>Kind:</strong> " + kind + "</li>" +
-              "<li><strong>Geboortedatum:</strong> " + escHtml(r[3]) + "</li>" +
-              "<li><strong>Ouder/verzorger:</strong> " + escHtml(r[7]) + "</li>" +
-              "<li><strong>Telefoon:</strong> " + escHtml(r[8]) + "</li>" +
-              "<li><strong>E-mail:</strong> " + escHtml(r[9]) + "</li>" +
-              "<li><strong>Woonplaats:</strong> " + escHtml(r[6]) + "</li>" +
-              "<li><strong>Opgegeven op:</strong> " + escHtml(r[20]) + "</li>" +
-              "</ul>" +
-              "<p>Bekijk de aanmelding in de spreadsheet: <a href=\"" + link + "\">" + link + "</a></p>"
+            body: tekst
           });
         }
       }
@@ -183,6 +182,13 @@ function verstuurOnverzondenMails() {
       blad.getRange(i + 1, 22).setValue("FOUT: " + fout);
     }
   }
+}
+
+function datumAlsTekst(w) {
+  if (w instanceof Date) {
+    return Utilities.formatDate(w, "GMT+0200", "dd-MM-yyyy");
+  }
+  return String(w || "");
 }
 
 function escHtml(s) {
