@@ -1,45 +1,33 @@
 /* ============================================================
-   BACKEND - Opgave jeugdviscursus HSV De Ruisvoorn (nieuw)
+   BACKEND (webapp) - Opgave jeugdviscursus HSV De Ruisvoorn
    ------------------------------------------------------------
-   WAT DIT DOET
-   - doPost:  elke formulier-aanmelding komt als rij in de
-              gekoppelde spreadsheet terecht.
-   - Timer:   de eigen functie 'verstuurOnverzondenMails' stuurt
-              per nieuwe aanmelding een meldingsmail naar de club.
-              De web-app zelf stuurt géén mail: een anonieme
-              aanroep is daar niet toe geautoriseerd, daarom
-              gebeurt het mailen via een timer die onder jouw
-              eigen account draait.
-   - Kolom U ("Mail verstuurd") toont per rij de afhandeling:
-        'ja'      = mail verzonden
-        FOUT-tekst = zichtbare foutmelding (zo is een probleem
-                     meteen te zien en op te lossen)
-        (leeg)    = nog niet door de timer verwerkt
+   ALGEMEEN: dit is het éénpuntige, schone bestand.
+   - Zet HET in het Apps Script-project dat gekoppeld zit aan de
+     nieuwe spreadsheet "Aanmeldingen jeugdviscursus".
+   - De web-app slaat uitsluitend aanmeldingen op. De meldingsmail
+     verstuurt een APART TIMER-PROJECT (bestand
+     "TIMER-NOTIFICATIE.js"); dat staat in een eigen project van
+     deruisvoornhelden@gmail.com. Waarom? Omdat het club-domein
+     (hsvderuisvoorn.nl) op Microsoft draait met een streng
+     spambeleid (SPF/DMARC): mails "van paul@hsvderuisvoorn.nl"
+     worden daardoor in quarantaine gezet, terwijl mails vanaf een
+     gewoon Gmail-account altijd aankomen.
 
-   MELDINGSADRESSEN
-   Wijzig hieronder de lijst als de mail naar andere adressen moet
-   gaan. Voorbeeld:
-     var MELDINGADRESSEN = ["ledenadministratie@hsvderuisvoorn.nl"];
-
-   INSTALLEREN (eenmalig)
-   1. Koppel dit bestand aan de spreadsheet "Aanmeldingen
-      jeugdviscursus": open die sheet -> Extensies > Apps Script
-      -> vervang alle code door DIT bestand -> Ctrl+S.
-   2. Implementeren > Nieuwe implementatie > Web-app >
-      Uitvoeren als: Ik  |  Toegang: Iedereen.
-   3. Zet de /exec-URL in opgave.js (BACKEND_URL).
-   4. Maak EEN timer: links het klok-icoon > + Add Trigger >
-      functie: verstuurOnverzondenMails > Time-driven >
-      Minutes timer > Every 5 minutes > Save.
+   HOE INSTALLEREN? (eenmalig, in 4 stappen)
+   1. Drive > map "Opgave jeugdcursus" > Nieuw > Google Spreadsheets
+      > hernoem: "Aanmeldingen jeugdviscursus".
+   2. Open die sheet > Extensies > Apps Script > kies/kopieer de
+      projectnaam door deze te klikken; vervang ALLE code door DIT
+      bestand > Ctrl+S.
+   3. Implementeren > Nieuwe implementatie > Web-app >
+      Uitvoeren als: Ik  |  Toegang: Iedereen > Implementeren.
+   4. Kopieer de /exec-URL en zet die in opgave.js (BACKEND_URL).
+   GEEN TRIGGER NODIG HIER: dit project verstuurt geen mail.
    ============================================================ */
 
-var MELDINGADRESSEN = [
-  "secretariaat@hsvderuisvoorn.nl",
-  "ledenadministratie@hsvderuisvoorn.nl"
-];
-
 /* ------------------------------------------------------------
-   Ontvangt het formulier en zet de aanmelding in de sheet.
+   Ontvangt het formulier en zet de aanmelding als rij in de
+   spreadsheet (tabblad "Aanmeldingen").
    ------------------------------------------------------------ */
 function doPost(e) {
   var json = {};
@@ -81,8 +69,9 @@ function doPost(e) {
 }
 
 /* ------------------------------------------------------------
-   Koppelt een spreadsheet en gebruikt (of maakt) tabblad
-   "Aanmeldingen" met kolomkoppen.
+   Koppelt een spreadsheet en gebruikt (of maakt) het tabblad
+   "Aanmeldingen" met kolomkoppen (t/m "Mail verstuurd", dat de
+   timer gebruikt).
    ------------------------------------------------------------ */
 function koppelSpreadsheet() {
   var bestand;
@@ -122,7 +111,7 @@ function koppelSpreadsheet() {
   }
 
   if (blad.getLastColumn() < 22) {
-    blad.getRange(1, blad.getLastColumn() + 1).setValue("Mail verstuurd");
+    blad.getRange(1, 22).setValue("Mail verstuurd");
   }
 
   return { blad: blad, nieuwGemaakt: nieuwGemaakt };
@@ -142,66 +131,8 @@ function verplaatsNaarMap(bestand, mapNaam) {
 }
 
 /* ------------------------------------------------------------
-   TIMER-FUNCTIE: verstuurt alle nog onverzonden meldingen.
-   Zet deze op een timer (elke 5 minuten). Per rij komt in
-   kolom U te staan: "ja" (verzonden) of de foutmelding.
-   ------------------------------------------------------------ */
-function verstuurOnverzondenMails() {
-  var blad = koppelSpreadsheet().blad;
-  var data = blad.getDataRange().getValues();
-
-  for (var i = 1; i < data.length; i++) {
-    var r = data[i];
-    if (String(r[21]) === "ja") continue;   /* kolom V: al verzonden */
-
-    try {
-      var kind = escHtml([r[1], r[2]].join(" ").trim()) || "onbekend kind";
-      var gebDatum = datumAlsTekst(r[3]);
-      var opgDatum = datumAlsTekst(r[20]);
-      if (MELDINGADRESSEN.length > 0) {
-        var tekst =
-          "Er is een nieuwe opgave voor de jeugdviscursus geregistreerd.\n\n" +
-          "Kind: " + kind + "\n" +
-          "Geboortedatum: " + gebDatum + "\n" +
-          "Ouder/verzorger: " + r[7] + "\n" +
-          "Telefoon: " + r[8] + "\n" +
-          "E-mail: " + r[9] + "\n" +
-          "Woonplaats: " + r[6] + "\n" +
-          "Opgegeven op: " + opgDatum + "\n" +
-          "\nAlle aanmeldingen staan in de spreadsheet 'Opgaves jeugdVIScursus' (tabblad Aanmeldingen).";
-        for (var a = 0; a < MELDINGADRESSEN.length; a++) {
-          MailApp.sendEmail({
-            to: MELDINGADRESSEN[a],
-            subject: "Nieuwe opgave jeugdviscursus: " + kind,
-            body: tekst
-          });
-        }
-      }
-      blad.getRange(i + 1, 22).setValue("ja");
-    } catch (fout) {
-      blad.getRange(i + 1, 22).setValue("FOUT: " + fout);
-    }
-  }
-}
-
-function datumAlsTekst(w) {
-  if (w instanceof Date) {
-    return Utilities.formatDate(w, "GMT+0200", "dd-MM-yyyy");
-  }
-  return String(w || "");
-}
-
-function escHtml(s) {
-  return String(s || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-/* ------------------------------------------------------------
-   Kleine bevestigingspagina als iemand de /exec-URL in een
-   browser opent (geen formulier, alleen "backend werkt").
+   Bevestigingspagina als iemand de /exec-URL in een browser
+   opent (geen formulier, alleen "backend actief").
    ------------------------------------------------------------ */
 function doGet() {
   return ContentService.createTextOutput("Backend opgave jeugdviscursus: actief.")
