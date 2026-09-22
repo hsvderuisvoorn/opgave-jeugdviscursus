@@ -35,7 +35,7 @@
 
 var MELDINGADRESSEN = [
   "ledenadministratie@hsvderuisvoorn.nl",
-  "deruisvoorhelden@gmail.com"
+  "deruisvoornhelden@gmail.com"
 ];
 
 /* ------------------------------------------------------------
