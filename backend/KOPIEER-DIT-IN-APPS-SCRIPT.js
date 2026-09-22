@@ -16,10 +16,10 @@
                      meteen te zien en op te lossen)
         (leeg)    = nog niet door de timer verwerkt
 
-   MELDINGSADRES
-   Wijzig hieronder één regel als de mail naar een ander adres
-   moet gaan (bijv. ledenadministratie@hsvderuisvoorn.nl of
-   deruisvoorhelden@gmail.com).
+   MELDINGSADRESSEN
+   Wijzig hieronder de lijst als de mail naar andere adressen moet
+   gaan. Voorbeeld:
+     var MELDINGADRESSEN = ["ledenadministratie@hsvderuisvoorn.nl"];
 
    INSTALLEREN (eenmalig)
    1. Koppel dit bestand aan de spreadsheet "Aanmeldingen
@@ -33,7 +33,10 @@
       Minutes timer > Every 5 minutes > Save.
    ============================================================ */
 
-var MELDINGSADRES = "secretariaat@hsvderuisvoorn.nl";
+var MELDINGADRESSEN = [
+  "ledenadministratie@hsvderuisvoorn.nl",
+  "deruisvoorhelden@gmail.com"
+];
 
 /* ------------------------------------------------------------
    Ontvangt het formulier en zet de aanmelding in de sheet.
@@ -155,23 +158,25 @@ function verstuurOnverzondenMails() {
 
     try {
       var kind = escHtml([r[1], r[2]].join(" ").trim()) || "onbekend kind";
-      if (MELDINGSADRES) {
-        MailApp.sendEmail({
-          to: MELDINGSADRES,
-          subject: "Nieuwe opgave jeugdviscursus: " + kind,
-          htmlBody:
-            "<p>Er is een nieuwe aanmelding voor de jeugdviscursus geregistreerd:</p>" +
-            "<ul>" +
-            "<li><strong>Kind:</strong> " + kind + "</li>" +
-            "<li><strong>Geboortedatum:</strong> " + escHtml(r[3]) + "</li>" +
-            "<li><strong>Ouder/verzorger:</strong> " + escHtml(r[7]) + "</li>" +
-            "<li><strong>Telefoon:</strong> " + escHtml(r[8]) + "</li>" +
-            "<li><strong>E-mail:</strong> " + escHtml(r[9]) + "</li>" +
-            "<li><strong>Woonplaats:</strong> " + escHtml(r[6]) + "</li>" +
-            "<li><strong>Opgegeven op:</strong> " + escHtml(r[20]) + "</li>" +
-            "</ul>" +
-            "<p>Bekijk de aanmelding in de spreadsheet: <a href=\"" + link + "\">" + link + "</a></p>"
-        });
+      if (MELDINGADRESSEN.length > 0) {
+        for (var a = 0; a < MELDINGADRESSEN.length; a++) {
+          MailApp.sendEmail({
+            to: MELDINGADRESSEN[a],
+            subject: "Nieuwe opgave jeugdviscursus: " + kind,
+            htmlBody:
+              "<p>Er is een nieuwe aanmelding voor de jeugdviscursus geregistreerd:</p>" +
+              "<ul>" +
+              "<li><strong>Kind:</strong> " + kind + "</li>" +
+              "<li><strong>Geboortedatum:</strong> " + escHtml(r[3]) + "</li>" +
+              "<li><strong>Ouder/verzorger:</strong> " + escHtml(r[7]) + "</li>" +
+              "<li><strong>Telefoon:</strong> " + escHtml(r[8]) + "</li>" +
+              "<li><strong>E-mail:</strong> " + escHtml(r[9]) + "</li>" +
+              "<li><strong>Woonplaats:</strong> " + escHtml(r[6]) + "</li>" +
+              "<li><strong>Opgegeven op:</strong> " + escHtml(r[20]) + "</li>" +
+              "</ul>" +
+              "<p>Bekijk de aanmelding in de spreadsheet: <a href=\"" + link + "\">" + link + "</a></p>"
+          });
+        }
       }
       blad.getRange(i + 1, 22).setValue("ja");
     } catch (fout) {
