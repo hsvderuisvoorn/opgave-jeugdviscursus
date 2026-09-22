@@ -8,9 +8,9 @@
    - Staat als timer (elke 5 minuten) in dat account.
    - Zoekt de spreadsheet "Aanmeldingen jeugdviscursus" (jullie
      aanmeldingen-sheet) op naam op.
-   - Stuurt voor elke onverwerkte rij een meldingsmail naar
-     secretariaat@ en ledenadministratie@, en zet in kolom V
-     ("Mail verstuurd") de status: "ja" of de fouttekst.
+- Stuurt voor elke onverwerkte rij een meldingsmail naar
+      secretariaat@ met een link naar de sheet, en zet in kolom V
+      ("Mail verstuurd") de status: "ja" of de fouttekst.
 
    INSTALLEREN (eenmalig)
    1. Log in als deruisvoornhelden@gmail.com.
@@ -22,12 +22,14 @@
    ============================================================ */
 
 var MELDINGADRESSEN = [
-  "secretariaat@hsvderuisvoorn.nl",
-  "ledenadministratie@hsvderuisvoorn.nl"
+  "secretariaat@hsvderuisvoorn.nl"
 ];
 
 function verstuurOnverzondenMails() {
-  var blad = vindBlad();
+  var gevonden = vindBlad();
+  var blad = gevonden.blad;
+  var sheetUrl = "https://docs.google.com/spreadsheets/d/" +
+                 gevonden.bestandId + "/edit";
   var data = blad.getDataRange().getValues();
 
   if (blad.getLastColumn() < 22) {
@@ -49,6 +51,7 @@ function verstuurOnverzondenMails() {
         "E-mail: " + r[9] + "\n" +
         "Woonplaats: " + r[6] + "\n" +
         "Opgegeven op: " + datumAlsTekst(r[20]) + "\n" +
+        "\nDirect openen: " + sheetUrl + "\n" +
         "\nAlle aanmeldingen staan in de spreadsheet 'Aanmeldingen jeugdviscursus' (tabblad Aanmeldingen).";
       for (var a = 0; a < MELDINGADRESSEN.length; a++) {
         MailApp.sendEmail({
@@ -82,8 +85,9 @@ function vindBlad() {
     throw new Error("spreadsheet 'Aanmeldingen jeugdviscursus' niet gevonden");
   }
   var bestand = SpreadsheetApp.openById(hit.getId());
-  return bestand.getSheetByName("Aanmeldingen") ||
-         bestand.insertSheet("Aanmeldingen");
+  var blad = bestand.getSheetByName("Aanmeldingen") ||
+             bestand.insertSheet("Aanmeldingen");
+  return { blad: blad, bestandId: hit.getId() };
 }
 
 function datumAlsTekst(w) {
