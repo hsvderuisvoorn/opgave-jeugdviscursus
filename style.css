@@ -254,9 +254,10 @@ button#verstuurBtn:disabled {
   background: #fff7e0;
   border-left: 4px solid #e0a800;
   border-radius: 0.35rem;
-  padding: 0.7rem 0.9rem;
+  padding: 1rem 1.1rem;
   margin: 0 0 1rem;
-  font-size: 0.98rem;
+  font-size: 1.3rem;
+  font-weight: 700;
 }
 .belangrijk p { margin: 0; }
 
