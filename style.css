@@ -33,9 +33,22 @@ html, body {
   background: var(--hoofd-groen);
   color: var(--wit);
   padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
 }
 .kop-balk h1 { margin: 0; font-size: 1.35rem; }
+.kop-balk h1 span { display: block; font-size: 0.8em; opacity: 0.85; font-weight: normal; }
 .kop-balk p  { margin: 0.2rem 0 0; font-size: 0.9rem; opacity: 0.9; }
+.kop-logo {
+  height: 3.4rem;
+  width: auto;
+  border-radius: 8px;
+  background: #fff;
+  padding: 3px;
+}
 
 /* ================= INHOUD ================= */
 .inhoud {
