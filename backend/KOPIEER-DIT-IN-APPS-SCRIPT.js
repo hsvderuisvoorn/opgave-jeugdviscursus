@@ -44,7 +44,7 @@ function doPost(e) {
     new Date(),                                   /* A datum/tijd opgave    */
     json.voornaamKind      || "",                 /* B voornaam kind        */
     json.achternaamKind    || "",                 /* C achternaam kind      */
-    json.geboorteDatumKind || "",                 /* D geboortedatum        */
+    nlDatum(json.geboorteDatumKind),           /* D geboortedatum (dd-mm-jjjj)  */
     json.adres             || "",                 /* E adres                */
     json.postcode          || "",                 /* F postcode             */
     json.woonplaats        || "",                 /* G woonplaats           */
@@ -61,7 +61,9 @@ function doPost(e) {
     json.fotoGemaakt       || "",                 /* R foto's mogen?        */
     json.avgAkkoord      === true ? "ja" : "nee", /* S AVG-akkoord          */
     json.whatsappGroep     || "",                 /* T whatsapp-groep       */
-    json.datumAanmelding   || ""                  /* U datum opgave (ISO)   */
+    json.datumAanmelding   || "",                  /* U datum opgave (ISO)       */
+    leeftijdTekst(json.geboorteDatumKind,
+                  json.datumAanmelding)            /* V leeftijd bij aanmelding  */
   ]);
 
   return ContentService.createTextOutput(JSON.stringify({ ok: true }))
@@ -101,7 +103,8 @@ function koppelSpreadsheet() {
       "Telefoon", "E-mail", "Lid vereniging", "Lidmaatschapsnr",
       "Eerder gevist", "Eerste keer cursus", "Allergie",
       "Toelichting allergie", "Opmerkingen", "Foto's toegestaan",
-      "AVG-akkoord", "Whatsapp-groep", "Datum opgave (ISO)", "Mail verstuurd"
+      "AVG-akkoord", "Whatsapp-groep", "Datum opgave (ISO)", "Mail verstuurd",
+      "Leeftijd"
     ];
     blad.getRange(1, 1, 1, koppen.length)
         .setValues([koppen])
@@ -112,6 +115,9 @@ function koppelSpreadsheet() {
 
   if (blad.getLastColumn() < 22) {
     blad.getRange(1, 22).setValue("Mail verstuurd");
+  }
+  if (blad.getLastColumn() < 23) {
+    blad.getRange(1, 23).setValue("Leeftijd");
   }
 
   return { blad: blad, nieuwGemaakt: nieuwGemaakt };
@@ -137,4 +143,73 @@ function verplaatsNaarMap(bestand, mapNaam) {
 function doGet() {
   return ContentService.createTextOutput("Backend opgave jeugdviscursus: actief.")
     .setMimeType(ContentService.MimeType.TEXT);
+}
+
+/* ------------------------------------------------------------
+   Zet "jjjj-mm-dd" (radioformaat/ISO) om naar "dd-mm-jjjj".
+   ------------------------------------------------------------ */
+function nlDatum(waarde) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(waarde || "").trim());
+  if (!m) return waarde || "";
+  return m[3] + "-" + m[2] + "-" + m[1];
+}
+
+/* ------------------------------------------------------------
+   Leeftijd (in jaren) op het moment van aanmelding.
+   ------------------------------------------------------------ */
+function leeftijdTekst(geboorte, aanmelding) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(geboorte || "").trim());
+  if (!m) return "";
+  var g = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  var nu = new Date();
+  if (aanmelding) {
+    var a = new Date(aanmelding);
+    if (!isNaN(a.getTime())) nu = a;
+  }
+  var lft = nu.getFullYear() - g.getFullYear();
+  var mnd = nu.getMonth() - g.getMonth();
+  if (mnd < 0 || (mnd === 0 && nu.getDate() < g.getDate())) lft--;
+  if (lft < 0) lft = 0;
+  return lft > 0 ? lft + " jaar" : "";
+}
+
+/* ------------------------------------------------------------
+   Eénmalig: corrigeer bestaande rijen in de sheet.
+   1) Geboortedatum (kolom D) omzetten naar dd-mm-jjjj.
+   2) Leeftijd (kolom W) invullen voor rijen zonder waarde.
+   Draai dit handmatig via het dropdown-menuletje ► in de
+   Apps Script-editor (functie: fixeerOpgaveData) of via een
+   trigger; het kan gerust meerdere keren.
+   ------------------------------------------------------------ */
+function fixeerOpgaveData() {
+  var blad = koppelSpreadsheet().blad;
+  var laatste = blad.getLastRow();
+  if (laatste < 2) return;
+  var waarden = blad.getRange(2, 1, laatste - 1, 23).getValues();
+  for (var r = 0; r < waarden.length; r++) {
+    var iso = isoVan(waarden[r][3]);
+    if (iso) {
+      waarden[r][3] = nlDatum(iso);
+      if (!waarden[r][22]) {
+        waarden[r][22] = leeftijdTekst(iso, waarden[r][20] || "");
+      }
+    }
+  }
+  blad.getRange(2, 1, waarden.length, 23).setValues(waarden);
+}
+
+/* ------------------------------------------------------------
+   Haalt "jjjj-mm-dd" uit een Date, een ISO-tekenreeks of een
+   dd-mm-jjjj-tekenreeks. Geeft "" terug als het niet herkend.
+   ------------------------------------------------------------ */
+function isoVan(waarde) {
+  if (waarde instanceof Date && !isNaN(waarde.getTime())) {
+    return Utilities.formatDate(waarde, "GMT+0200", "yyyy-MM-dd");
+  }
+  var s = String(waarde || "").trim();
+  var m1 = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  if (m1) return m1[1] + "-" + m1[2] + "-" + m1[3];
+  var m2 = /^(\d{2})-(\d{2})-(\d{4})$/.exec(s);
+  if (m2) return m2[3] + "-" + m2[2] + "-" + m2[1];
+  return "";
 }
