@@ -41,7 +41,7 @@ function doPost(e) {
 
   var blad = koppelSpreadsheet().blad;
   blad.appendRow([
-    new Date(),                                   /* A datum/tijd opgave    */
+    naarDagMaandJaar(new Date()),              /* A datum opgave (dd-mm-jjjj)    */
     json.voornaamKind      || "",                 /* B voornaam kind        */
     json.achternaamKind    || "",                 /* C achternaam kind      */
     nlDatum(json.geboorteDatumKind),           /* D geboortedatum (dd-mm-jjjj)  */
@@ -61,13 +61,108 @@ function doPost(e) {
     json.fotoGemaakt       || "",                 /* R foto's mogen?        */
     json.avgAkkoord      === true ? "ja" : "nee", /* S AVG-akkoord          */
     json.whatsappGroep     || "",                 /* T whatsapp-groep       */
-    json.datumAanmelding   || "",                  /* U datum opgave (ISO)       */
+    nlDatum(json.datumAanmelding),                 /* U datum opgave (dd-mm-jjjj)  */
+    "",                                            /* V mail verstuurd (timer vult) */
     leeftijdTekst(json.geboorteDatumKind,
-                  json.datumAanmelding)            /* V leeftijd bij aanmelding  */
+                  json.datumAanmelding)            /* W leeftijd bij aanmelding   */
   ]);
+
+  opmaakToepassen(blad);
 
   return ContentService.createTextOutput(JSON.stringify({ ok: true }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/* ------------------------------------------------------------
+   Opmaak van de sheet (handmatig draaien): ► verfraaiOpgaveSheet
+   ------------------------------------------------------------ */
+function verfraaiOpgaveSheet() {
+  var blad = koppelSpreadsheet().blad;
+  verwijderKolommenXYZ(blad);
+  opmaakToepassen(blad);
+}
+
+/* ------------------------------------------------------------
+   Verwijdert oude/lege kolommen X, Y en Z (24 t/m laatste) uit het
+   tabblad 'Aanmeldingen'. Eenmalig handmatig draaien; staat ook
+   vooraan verfraaiOpgaveSheet zodat een nieuw opgemaakte sheet
+   netjes eindigt bij Leeftijd (W).
+   ------------------------------------------------------------ */
+function verwijderKolommenXYZ(blad) {
+  var laatste = blad.getLastColumn();
+  if (laatste >= 24) {
+    blad.deleteColumns(24, laatste - 23);
+    Logger.log("Extra kolommen vanaf X verwijderd (had " + laatste + " kolommen).");
+  }
+}
+
+/* Zet consistente opmaak op de hele sheet: groene/witte koptekst,
+   eerste rij bevroren, randen en tekst omslaan voor de lange
+   kolommen; kolombreedtes passen zich automatisch aan de tekst aan.
+   Kan gerust vaker draaien. */
+function opmaakToepassen(blad) {
+  blad.setRowHeight(1, 24);
+  blad.setFrozenRows(1);
+
+  var kop = blad.getRange(1, 1, 1, 23);
+  kop.setFontWeight("bold")
+     .setBackground("#1b5e20")
+     .setFontColor("#ffffff")
+     .setFontFamily("Arial")
+     .setFontSize(10)
+     .setHorizontalAlignment("center")
+     .setVerticalAlignment("middle")
+     .setBorder(true, true, true, true, true, true,
+                "#cfd8dc", SpreadsheetApp.BorderStyle.SOLID);
+
+  var laatste = blad.getLastRow();
+  if (laatste >= 2) {
+    var data = blad.getRange(2, 1, laatste - 1, 23);
+    data.setFontFamily("Arial")
+        .setFontSize(10)
+        .setVerticalAlignment("middle")
+        .setBorder(true, true, true, true, true, true,
+                   "#e0e0e0", SpreadsheetApp.BorderStyle.SOLID);
+    /* tekst omslaan voor de lange kolommen: E=adres, P=toelichting,
+       Q=opmerkingen, V=mailstatus */
+    for (var k = 0; k < [5, 16, 17, 22].length; k++) {
+      blad.getRange(2, [5, 16, 17, 22][k], laatste - 1, 1).setWrap(true);
+    }
+    fitKolombreedtes(blad, laatste);
+  } else {
+    fitKolombreedtes(blad, 1);
+  }
+}
+
+/* Pas kolombreedtes aan de langste tekst in elke kolom aan (kop rij
+   en alle rijen eronder). Kolommen met tekst-omslaan mogen niet
+   eindeloos uitrekken; die krijgen een max-breedte. */
+function fitKolombreedtes(blad, laatste) {
+  if (laatste < 1) laatste = 1;
+  var kopRij = blad.getRange(1, 1, 1, 23).getValues()[0];
+  var waarden = laatste >= 2 ? blad.getRange(2, 1, laatste - 1, 23).getValues() : [];
+  var omslaan = [5, 16, 17, 22];              /* E, P, Q en V */
+  var maxPerKolom = {
+    1: 10,                                    /* A datum: compact                  */
+    22: 16,                                   /* V mailstatus: compact             */
+    10: 34                                    /* J e-mail: niet eindeloos breed    */
+  };
+  var limietNormaal = 45;
+  var limietWrap = 30;
+  for (var c = 0; c < 23; c++) {
+    var kolom = c + 1;
+    var langste = String(kopRij[c] || "").length;
+    for (var r = 0; r < waarden.length; r++) {
+      var regels = String(waarden[r][c] || "").split("\n");
+      for (var z = 0; z < regels.length; z++) {
+        if (regels[z].length > langste) langste = regels[z].length;
+      }
+    }
+    var limiet = maxPerKolom[kolom];
+    if (!limiet) limiet = omslaan.indexOf(kolom) !== -1 ? limietWrap : limietNormaal;
+    var tekens = Math.min(limiet, langste);
+    blad.setColumnWidth(c + 1, Math.ceil(tekens * 8.5) + 12);
+  }
 }
 
 /* ------------------------------------------------------------
@@ -103,7 +198,7 @@ function koppelSpreadsheet() {
       "Telefoon", "E-mail", "Lid vereniging", "Lidmaatschapsnr",
       "Eerder gevist", "Eerste keer cursus", "Allergie",
       "Toelichting allergie", "Opmerkingen", "Foto's toegestaan",
-      "AVG-akkoord", "Whatsapp-groep", "Datum opgave (ISO)", "Mail verstuurd",
+      "AVG-akkoord", "Whatsapp-groep", "Datum opgave", "Mail verstuurd",
       "Leeftijd"
     ];
     blad.getRange(1, 1, 1, koppen.length)
@@ -111,6 +206,7 @@ function koppelSpreadsheet() {
         .setFontWeight("bold")
         .setBackground("#1b5e20")
         .setFontColor("#ffffff");
+    opmaakToepassen(blad);
   }
 
   if (blad.getLastColumn() < 22) {
@@ -118,6 +214,10 @@ function koppelSpreadsheet() {
   }
   if (blad.getLastColumn() < 23) {
     blad.getRange(1, 23).setValue("Leeftijd");
+  }
+  /* bestaande sheet: nog oude kop 'Datum opgave (ISO)' hernoemen */
+  if (String(blad.getRange(1, 21).getValue()) === "Datum opgave (ISO)") {
+    blad.getRange(1, 21).setValue("Datum opgave");
   }
 
   return { blad: blad, nieuwGemaakt: nieuwGemaakt };
@@ -149,9 +249,21 @@ function doGet() {
    Zet "jjjj-mm-dd" (radioformaat/ISO) om naar "dd-mm-jjjj".
    ------------------------------------------------------------ */
 function nlDatum(waarde) {
-  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(waarde || "").trim());
+  var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(waarde || "").trim());
   if (!m) return waarde || "";
   return m[3] + "-" + m[2] + "-" + m[1];
+}
+
+/* ------------------------------------------------------------
+   Zet een datum (Date, ISO-tekenreeks of dd-mm-jjjj) om naar een
+   losse datum in dd-mm-jjjj. Gebruikt de tijdzone van het project,
+   zodat de datum ook 's avonds/’s winters klopt.
+   ------------------------------------------------------------ */
+function naarDagMaandJaar(waarde) {
+  if (waarde instanceof Date && !isNaN(waarde.getTime())) {
+    return Utilities.formatDate(waarde, Session.getScriptTimeZone(), "dd-MM-yyyy");
+  }
+  return nlDatum(waarde);
 }
 
 /* ------------------------------------------------------------
@@ -163,7 +275,13 @@ function leeftijdTekst(geboorte, aanmelding) {
   var g = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
   var nu = new Date();
   if (aanmelding) {
-    var a = new Date(aanmelding);
+    var a;
+    if (aanmelding instanceof Date) {
+      a = aanmelding;
+    } else {
+      var iso = isoVan(aanmelding);
+      a = iso ? new Date(iso + "T00:00:00") : new Date(aanmelding);
+    }
     if (!isNaN(a.getTime())) nu = a;
   }
   var lft = nu.getFullYear() - g.getFullYear();
@@ -187,12 +305,22 @@ function fixeerOpgaveData() {
   if (laatste < 2) return;
   var waarden = blad.getRange(2, 1, laatste - 1, 23).getValues();
   for (var r = 0; r < waarden.length; r++) {
+    waarden[r][0] = naarDagMaandJaar(waarden[r][0]);
     var iso = isoVan(waarden[r][3]);
     if (iso) {
       waarden[r][3] = nlDatum(iso);
       if (!waarden[r][22]) {
         waarden[r][22] = leeftijdTekst(iso, waarden[r][20] || "");
       }
+    }
+    /* oudere rijen hadden de leeftijd per abuis in kolom V (mailstatus); ruimen op */
+    if (/^\d+\s*jaar$/.test(String(waarden[r][21] || ""))) {
+      waarden[r][21] = "";
+    }
+    /* kolom U: datum opgave als losse datum in dd-mm-jjjj (was ISO-datum/-tijdstip) */
+    var u0 = String(waarden[r][20] || "").trim();
+    if (u0) {
+      waarden[r][20] = nlDatum(u0);
     }
   }
   blad.getRange(2, 1, waarden.length, 23).setValues(waarden);
