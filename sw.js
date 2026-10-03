@@ -6,12 +6,12 @@
    zodra de app voor het eerst geladen wordt. Bij elke wijziging
    van de bestanden deze CACHE-NAAM opvoeren (nieuwe versie).
 
-   CACHE-NAAM: v18-20261003
+   CACHE-NAAM: v19-20261003
    ============================================================ */
 
 "use strict";
 
-var CACHE_NAAM = "opgave-jeugdviscursus-v18";
+var CACHE_NAAM = "opgave-jeugdviscursus-v19";
 
 var PRECACHE = [
   "./",
@@ -53,11 +53,28 @@ self.addEventListener("activate", function (event) {
 
 self.addEventListener("fetch", function (event) {
   if (event.request.method !== "GET") { return; }
-  event.respondWith(
-    caches.match(event.request)
-      .then(function (inCache) {
-        if (inCache) { return inCache; }
-        return fetch(event.request);
-      })
-  );
+  var isPagina = event.request.mode === "navigate";
+  if (isPagina) {
+    event.respondWith(
+      fetch(event.request)
+        .then(function (respons) {
+          var kopie = respons.clone();
+          caches.open(CACHE_NAAM).then(function (cache) {
+            cache.put(event.request, kopie);
+          });
+          return respons;
+        })
+        .catch(function () {
+          return caches.match(event.request);
+        })
+    );
+  } else {
+    event.respondWith(
+      caches.match(event.request)
+        .then(function (inCache) {
+          if (inCache) { return inCache; }
+          return fetch(event.request);
+        })
+    );
+  }
 });
