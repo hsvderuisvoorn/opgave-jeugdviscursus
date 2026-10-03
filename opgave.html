@@ -46,7 +46,8 @@
 
       <div class="veld-groep">
         <label for="geboorteDatumKind">Geboortedatum kind <span class="verplicht">*</span></label>
-        <input type="date" id="geboorteDatumKind" name="geboorteDatumKind" required>
+        <input type="text" id="geboorteDatumKind" name="geboorteDatumKind" placeholder="dd-mm-jjjj (bijv. 16-05-2016)" inputmode="numeric" maxlength="10" autocomplete="bday" required>
+        <p id="geboorteDatumMelding" class="veld-fout" hidden>Vul een geldige geboortedatum in, bijvoorbeeld 16-05-2016.</p>
         <p id="leeftijdMelding" class="veld-fout" hidden>Opgave is niet mogelijk: dit kind is op 1 januari van het cursusjaar al 14 jaar. Het kind mag op 1 januari van het cursusjaar nog geen 14 jaar zijn.</p>
       </div>
 

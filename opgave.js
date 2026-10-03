@@ -30,6 +30,57 @@
 var CURSUSJAAR = "2027";
 
 /* ============================================================
+   GEBOORTEDATUM (handmatig in te voeren, dd-mm-jjjj)
+   Het geboortedatumveld is een tekstveld (in plaats van het
+   type="date"-veld, waar browsers handmatig typen blokkeren).
+   Tijdens het typen worden de liggende streepjes automatisch
+   geplaatst. Bij verzenden wordt de datum omgezet naar de
+   ISO-vorm (jjjj-mm-dd) die de backend verwacht.
+   ============================================================ */
+function geboorteNaIso(waarde) {
+  var m = /^(\d{2})-(\d{2})-(\d{4})$/.exec(String(waarde || "").trim());
+  if (!m) return "";
+  var dag = Number(m[1]);
+  var maand = Number(m[2]);
+  var jaar = Number(m[3]);
+  var d = new Date(jaar, maand - 1, dag);
+  if (d.getFullYear() !== jaar || d.getMonth() !== maand - 1 || d.getDate() !== dag) {
+    return "";
+  }
+  return ("0000" + jaar).slice(-4) + "-" +
+         ("0" + maand).slice(-2) + "-" +
+         ("0" + dag).slice(-2);
+}
+
+function geboorteDatumMasker(e) {
+  var veld = e.target;
+  var cijfers = (veld.value || "").replace(/[^0-9]/g, "").slice(0, 8);
+  var delen = [];
+  if (cijfers.length > 4) {
+    delen.push(cijfers.slice(0, 2), cijfers.slice(2, 4), cijfers.slice(4, 8));
+  } else if (cijfers.length > 2) {
+    delen.push(cijfers.slice(0, 2), cijfers.slice(2));
+  } else {
+    delen.push(cijfers);
+  }
+  veld.value = delen.join("-");
+}
+
+function controleerGeboorteDatum() {
+  var veld = document.getElementById("geboorteDatumKind");
+  var melding = document.getElementById("geboorteDatumMelding");
+  if (!veld) { return true; }
+  var waarde = (veld.value || "").trim();
+  if (!waarde) {
+    if (melding) { melding.hidden = true; }
+    return true;
+  }
+  var geldig = geboorteNaIso(waarde) !== "";
+  if (melding) { melding.hidden = geldig; }
+  return geldig;
+}
+
+/* ============================================================
    LEEFTIJDSGRENS (automatisch gebaseerd op CURSUSJAAR - 14)
    Regel: het kind mag op 1 januari van het cursusjaar nog
    GEEN 14 jaar zijn. De grens met het jaar wordt dus berekend
@@ -39,7 +90,7 @@ function controleerLeeftijd() {
   var veld = document.getElementById("geboorteDatumKind");
   var melding = document.getElementById("leeftijdMelding");
   if (!veld) { return true; }
-  var datum = veld.value;
+  var datum = geboorteNaIso(veld.value);
   if (!datum) { if (melding) { melding.hidden = true; } return true; }
   var grens = (parseInt(CURSUSJAAR, 10) - 14) + "-01-01";
   var teOud = datum <= grens;
@@ -170,7 +221,7 @@ function verzamelAanmelding() {
     type: "aanmelding-jeugdviscursus",
     voornaamKind:   waarde("voornaamKind"),
     achternaamKind: waarde("achternaamKind"),
-    geboorteDatumKind: waarde("geboorteDatumKind"),
+    geboorteDatumKind: geboorteNaIso(waarde("geboorteDatumKind")),
     adres:          waarde("adres"),
     postcode:       waarde("postcode"),
     woonplaats:     waarde("woonplaats"),
@@ -199,6 +250,13 @@ function verstuurFormulier(e) {
   if (!form.checkValidity()) {
     toonStatus("Er zijn nog verplichte velden niet (goed) ingevuld. De formulieren met een rode rand kan je verbeteren.", "fout");
     form.reportValidity();
+    return;
+  }
+
+  if (!controleerGeboorteDatum()) {
+    toonStatus("Vul een geldige geboortedatum in (dd-mm-jjjj), bijvoorbeeld 16-05-2016.", "fout");
+    var gebDatum = document.getElementById("geboorteDatumKind");
+    if (gebDatum) { gebDatum.focus(); }
     return;
   }
 
@@ -239,13 +297,16 @@ function koppelKlaarzetten() {
   form.addEventListener("submit", verstuurFormulier);
   form.noValidate = true;
 
-  /* leeftijdscontrole direct bij het verlaten van het geboortedatumveld */
+  /* geboortedatum: masker tijdens typen + controle bij verlaten */
   var gebDatumVeld = document.getElementById("geboorteDatumKind");
   if (gebDatumVeld) {
+    gebDatumVeld.addEventListener("input", geboorteDatumMasker);
     gebDatumVeld.addEventListener("blur", function () {
+      controleerGeboorteDatum();
       controleerLeeftijd();
     });
     gebDatumVeld.addEventListener("change", function () {
+      controleerGeboorteDatum();
       controleerLeeftijd();
     });
   }
