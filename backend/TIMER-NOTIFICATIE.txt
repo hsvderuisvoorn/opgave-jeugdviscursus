@@ -139,15 +139,16 @@ function verwerkOnverzondenMails() {
         verzendMetRetry(MELDINGADRESSEN[a], "Nieuwe opgave jeugdviscursus: " + kind, meldingTekst);
       }
 
-      /* bevestigingsmail naar de ouder/verzorger (de bedankpagina-tekst);
-         verstuurd "van" secretariaat@hsvderuisvoorn.nl (alias) */
+      /* bevestigingsmail naar de ouder/verzorger (de bedankpagina-tekst).
+         Verstuurd vanaf het eigen gmail-account voor optimale bezorging.
+         Antwoorden komen bij secretariaat@hsvderuisvoorn.nl binnen (Reply-To). */
       var ouderMail = String(r[9] || "").trim();
       if (ouderMail) {
         if (isGeldigEmail(ouderMail)) {
           verzendMetRetry(ouderMail,
             "Aanmelding jeugdviscursus ontvangen: " + kind,
             maakBevestiging(kindS),
-            { adres: AFZENDERADRES, naam: AFZENDERNAAM });
+            { naam: AFZENDERNAAM, replyTo: AFZENDERADRES });
         } else {
           Logger.log("Rij " + (i + 1) + ": e-mailadres ouder/verzorger overgeslagen (ongeldig): " + ouderMail);
         }
@@ -206,11 +207,12 @@ function verzendMetRetry(naar, onderwerp, tekst, vanOpties) {
         if (aliases.indexOf(vanOpties.adres) !== -1) {
           GmailApp.sendEmail(naar, onderwerp, tekst, {
             from: vanOpties.adres,
-            name: vanOpties.naam || ""
+            name: vanOpties.naam || "",
+            replyTo: vanOpties.replyTo || vanOpties.adres
           });
         } else {
           Logger.log("Alias " + vanOpties.adres + " staat niet in deze Gmail (aliassen: " + aliases.join(", ") + "); verstuur via eigen account met afzendernaam");
-          MailApp.sendEmail(naar, onderwerp, tekst, { name: vanOpties.naam || "" });
+          MailApp.sendEmail(naar, onderwerp, tekst, { name: vanOpties.naam || "", replyTo: vanOpties.replyTo || vanOpties.adres || "" });
         }
       } else {
         MailApp.sendEmail({ to: naar, subject: onderwerp, body: tekst });
