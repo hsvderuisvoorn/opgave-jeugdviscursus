@@ -184,7 +184,9 @@ function maakBevestiging(kind) {
     "Heeft u in de tussentijd vragen? Stuur die dan naar secretariaat@hsvderuisvoorn.nl.",
     "",
     "Met vriendelijke groet,",
-    "HSV De Ruisvoorn"
+    "HSV De Ruisvoorn",
+    "",
+    "Let op: antwoorden op deze bevestigingsmail komen bij secretariaat@hsvderuisvoorn.nl terecht. Deze mail kan soms in uw spam-map terechtkomen."
   ].join("\n");
 }
 
