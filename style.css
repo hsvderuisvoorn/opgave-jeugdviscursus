@@ -273,6 +273,7 @@ button#verstuurBtn:disabled {
   font-weight: 700;
 }
 .belangrijk p { margin: 0; }
+.belangrijk p + p { margin-top: 0.8rem; }
 
 /* ================= VOET ================= */
 .voet {
