@@ -33,6 +33,15 @@
    4. Klok-icoon > + Add Trigger > functie
       verstuurOnverzondenMails > Time-driven > Every 5 minutes.
    5. Toestemming geven (> Toestaan). Klaar.
+   5B. (OPTIONEEL, voor de afzender "secretariaat@..."):
+      Instellingen > Accounts en import > "Ander e-mailadres
+      verzenden als" > voeg secretariaat@hsvderuisvoorn.nl toe en
+      bevestig de code in het secretariaatsmailadres. Dan komt de
+      bevestigingsmail aan de ouder écht "van" secretariaat@
+      hsvderuisvoorn.nl binnen in plaats van vanuit het gmail-
+      account. Zonder deze alias verstuurt het script automatisch
+      via deruisvoornhelden@gmail.com met alleen de afzendernaam
+      "Secretariaat HSV De Ruisvoorn".
 
    UPDATE NA EERDERE INSTALLATIE:
    - Open het bestaande project, vervang alle code door de nieuwe
@@ -45,6 +54,16 @@
 var MELDINGADRESSEN = [
   "secretariaat@hsvderuisvoorn.nl"
 ];
+
+/* Afzender voor de bevestigingsmail aan de ouder/verzorger.
+   Zet secretariaat@hsvderuisvoorn.nl als "Verzenden als"-alias in
+   de Gmail-instellingen van deruisvoornhelden@gmail.com
+   (Instellingen > Accounts en import > Ander e-mailadres
+   verzenden als). Zonder die alias verstuurt het script de mail
+   automatisch via het eigen gmail-account, met alleen de
+   afzendernaam "Secretariaat HSV De Ruisvoorn". */
+var AFZENDERADRES = "secretariaat@hsvderuisvoorn.nl";
+var AFZENDERNAAM = "Secretariaat HSV De Ruisvoorn";
 
 var SLUITLEUTEL = "verstuurOnverzondenMails.lock";
 
@@ -120,13 +139,15 @@ function verwerkOnverzondenMails() {
         verzendMetRetry(MELDINGADRESSEN[a], "Nieuwe opgave jeugdviscursus: " + kind, meldingTekst);
       }
 
-      /* bevestigingsmail naar de ouder/verzorger (de bedankpagina-tekst) */
+      /* bevestigingsmail naar de ouder/verzorger (de bedankpagina-tekst);
+         verstuurd "van" secretariaat@hsvderuisvoorn.nl (alias) */
       var ouderMail = String(r[9] || "").trim();
       if (ouderMail) {
         if (isGeldigEmail(ouderMail)) {
           verzendMetRetry(ouderMail,
             "Aanmelding jeugdviscursus ontvangen: " + kind,
-            maakBevestiging(kindS));
+            maakBevestiging(kindS),
+            { adres: AFZENDERADRES, naam: AFZENDERNAAM });
         } else {
           Logger.log("Rij " + (i + 1) + ": e-mailadres ouder/verzorger overgeslagen (ongeldig): " + ouderMail);
         }
@@ -171,12 +192,36 @@ function isGeldigEmail(adres) {
 }
 
 /* Stuurt een mail met maximaal 3 pogingen (opvangen van
-   tijdelijke Google-serverfouten). */
-function verzendMetRetry(naar, onderwerp, tekst) {
+   tijdelijke Google-serverfouten). Is er een afzender optie mee
+   gegeven, dan wordt GmailApp gebruikt zodat de mail écht "van"
+   AFZENDERADRES lijkt te komen; zonder (of bij een niet-ingestelde)
+   alias valt het script terug op het eigen gmail-account met
+   alleen de afzendernaam. */
+function verzendMetRetry(naar, onderwerp, tekst, vanOpties) {
   var maxPogingen = 3;
   for (var p = 1; p <= maxPogingen; p++) {
     try {
-      MailApp.sendEmail({ to: naar, subject: onderwerp, body: tekst });
+      if (vanOpties && vanOpties.adres) {
+        try {
+          GmailApp.sendEmail({
+            to: naar,
+            subject: onderwerp,
+            body: tekst,
+            from: vanOpties.adres,
+            name: vanOpties.naam || ""
+          });
+        } catch (aliasFout) {
+          Logger.log("Alias " + vanOpties.adres + " niet beschikbaar (" + aliasFout.message + "); verstuur via eigen account met afzendernaam");
+          MailApp.sendEmail({
+            to: naar,
+            subject: onderwerp,
+            body: tekst,
+            name: vanOpties.naam || ""
+          });
+        }
+      } else {
+        MailApp.sendEmail({ to: naar, subject: onderwerp, body: tekst });
+      }
       return;
     } catch (fout) {
       if (p === maxPogingen) throw fout;
