@@ -202,22 +202,15 @@ function verzendMetRetry(naar, onderwerp, tekst, vanOpties) {
   for (var p = 1; p <= maxPogingen; p++) {
     try {
       if (vanOpties && vanOpties.adres) {
-        try {
-          GmailApp.sendEmail({
-            to: naar,
-            subject: onderwerp,
-            body: tekst,
+        var aliases = GmailApp.getAliases();
+        if (aliases.indexOf(vanOpties.adres) !== -1) {
+          GmailApp.sendEmail(naar, onderwerp, tekst, {
             from: vanOpties.adres,
             name: vanOpties.naam || ""
           });
-        } catch (aliasFout) {
-          Logger.log("Alias " + vanOpties.adres + " niet beschikbaar (" + aliasFout.message + "); verstuur via eigen account met afzendernaam");
-          MailApp.sendEmail({
-            to: naar,
-            subject: onderwerp,
-            body: tekst,
-            name: vanOpties.naam || ""
-          });
+        } else {
+          Logger.log("Alias " + vanOpties.adres + " staat niet in deze Gmail (aliassen: " + aliases.join(", ") + "); verstuur via eigen account met afzendernaam");
+          MailApp.sendEmail(naar, onderwerp, tekst, { name: vanOpties.naam || "" });
         }
       } else {
         MailApp.sendEmail({ to: naar, subject: onderwerp, body: tekst });
