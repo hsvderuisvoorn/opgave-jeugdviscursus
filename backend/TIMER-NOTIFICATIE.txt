@@ -181,12 +181,12 @@ function maakBevestiging(kind) {
     "",
     "Let op: dit betekent niet automatisch dat uw kind ook daadwerkelijk kan deelnemen aan de jeugdviscursus. Zodra alle opgaven verwerkt zijn, hoort u van ons of de deelname is bevestigd.",
     "",
-    "Heeft u in de tussentijd vragen? Stuur die dan naar secretariaat@hsvderuisvoorn.nl.",
+    "Deze bevestigingsmail is verzonden vanuit deruisvoornhelden@gmail.com. Deze mail kan soms in uw spam-map terechtkomen.",
+    "",
+    "Wilt u op deze mail antwoorden, stuur dan een mail naar secretariaat@hsvderuisvoorn.nl.",
     "",
     "Met vriendelijke groet,",
-    "HSV De Ruisvoorn",
-    "",
-    "Let op: antwoorden op deze bevestigingsmail komen bij secretariaat@hsvderuisvoorn.nl terecht. Deze mail kan soms in uw spam-map terechtkomen."
+    "HSV De Ruisvoorn"
   ].join("\n");
 }
 
