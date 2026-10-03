@@ -9,8 +9,12 @@
    - Zoekt de spreadsheet "Aanmeldingen jeugdviscursus" (jullie
      aanmeldingen-sheet) op naam op.
    - Stuurt voor elke onverwerkte rij een meldingsmail naar
-     secretariaat@ met een link naar de sheet, en zet in kolom V
-     ("Mail verstuurd") de status: "ja" of de fouttekst.
+     secretariaat@ met een link naar de sheet.
+   - Stuurt daarnaast een bevestigingsmail naar de ouder/verzorger
+     (e-mailadres in kolom J) met dezelfde tekst als de
+     bedankpagina, aanhef "Beste ouders/voogd".
+   - Zet in kolom V ("Mail verstuurd") de status: "ja" of de
+     fouttekst.
 
    ROBUUSTHEID
    - LockService: voorkomt dat twee runs tegelijk draaien.
@@ -33,6 +37,9 @@
    UPDATE NA EERDERE INSTALLATIE:
    - Open het bestaande project, vervang alle code door de nieuwe
      versie en sla op (Ctrl+S). Trigger en rechten blijven staan.
+   - Vanaf deze versie wordt er óók een bevestigingsmail naar de
+     ouder/verzorger gestuurd (kolom J). Rijen die al "ja" in
+     kolom V hebben worden niet opnieuw gemailed.
    ============================================================ */
 
 var MELDINGADRESSEN = [
@@ -96,8 +103,9 @@ function verwerkOnverzondenMails() {
     if (String(r[21]) === "ja") continue;   /* kolom V: al gemailed */
 
     try {
-      var kind = escHtml([r[1], r[2]].join(" ").trim()) || "onbekend kind";
-      var tekst =
+      var kindS = [r[1], r[2]].join(" ").trim();
+      var kind = escHtml(kindS) || "onbekend kind";
+      var meldingTekst =
         "Er is een nieuwe opgave voor de jeugdviscursus geregistreerd.\n\n" +
         "Kind: " + kind + "\n" +
         "Geboortedatum: " + datumAlsTekst(r[3]) + "\n" +
@@ -109,8 +117,23 @@ function verwerkOnverzondenMails() {
         "\nDirect openen: " + sheetUrl + "\n" +
         "\nAlle aanmeldingen staan in de spreadsheet 'Aanmeldingen jeugdviscursus' (tabblad Aanmeldingen).";
       for (var a = 0; a < MELDINGADRESSEN.length; a++) {
-        verzendMetRetry(MELDINGADRESSEN[a], "Nieuwe opgave jeugdviscursus: " + kind, tekst);
+        verzendMetRetry(MELDINGADRESSEN[a], "Nieuwe opgave jeugdviscursus: " + kind, meldingTekst);
       }
+
+      /* bevestigingsmail naar de ouder/verzorger (de bedankpagina-tekst) */
+      var ouderMail = String(r[9] || "").trim();
+      if (ouderMail) {
+        if (isGeldigEmail(ouderMail)) {
+          verzendMetRetry(ouderMail,
+            "Aanmelding jeugdviscursus ontvangen: " + kind,
+            maakBevestiging(kindS));
+        } else {
+          Logger.log("Rij " + (i + 1) + ": e-mailadres ouder/verzorger overgeslagen (ongeldig): " + ouderMail);
+        }
+      } else {
+        Logger.log("Rij " + (i + 1) + ": geen e-mailadres ouder/verzorger; bevestigingsmail overgeslagen.");
+      }
+
       blad.getRange(i + 1, 22).setValue("ja");
       verzonden++;
     } catch (fout) {
@@ -120,8 +143,31 @@ function verwerkOnverzondenMails() {
     }
   }
 
-  Logger.log("Gereed: " + verzonden + " mails verzonden, " + fouten +
+  Logger.log("Gereed: " + verzonden + " rijen verwerkt, " + fouten +
              " fouten, quota rest: " + MailApp.getRemainingDailyQuota());
+}
+
+/* Bevestigingsmail aan de ouder/verzorger: dezelfde tekst als de
+   bedankpagina, met aanhef "Beste ouders/voogd". */
+function maakBevestiging(kind) {
+  return [
+    "Beste ouders/voogd,",
+    "",
+    "Bedankt voor de aanmelding van " + (kind || "uw kind") + " voor de jeugdviscursus van HSV De Ruisvoorn.",
+    "",
+    "Uw aanmelding is in goede orde ontvangen en zal worden verwerkt door onze jeugdafdeling.",
+    "",
+    "Let op: dit betekent niet automatisch dat uw kind ook daadwerkelijk kan deelnemen aan de jeugdviscursus. Zodra alle opgaven verwerkt zijn, hoort u van ons of de deelname is bevestigd.",
+    "",
+    "Heeft u in de tussentijd vragen? Stuur die dan naar secretariaat@hsvderuisvoorn.nl.",
+    "",
+    "Met vriendelijke groet,",
+    "HSV De Ruisvoorn"
+  ].join("\n");
+}
+
+function isGeldigEmail(adres) {
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(adres || "").trim());
 }
 
 /* Stuurt een mail met maximaal 3 pogingen (opvangen van
