@@ -229,21 +229,30 @@ function verzendMetRetry(naar, onderwerp, tekst, vanOpties) {
    tabblad "Aanmeldingen" (maakt het tabblad indien nodig).
    ------------------------------------------------------------ */
 function vindBlad() {
-  var kandidaten = [];
-  var it = DriveApp.getFilesByName("Aanmeldingen jeugdviscursus");
-  while (it.hasNext()) {
-    var f = it.next();
-    if (f.getMimeType() === MimeType.GOOGLE_SHEETS) {
-      kandidaten.push(f);
+  var vasteId = "1ik0eHV7X4nvv4G6oIrs3Oo5BtQHiGUG7BpZoXlNDti0";
+  var bestand;
+  try {
+    bestand = SpreadsheetApp.openById(vasteId);
+  } catch (openFout) {
+    bestand = null;
+  }
+  if (!bestand) {
+    var kandidaten = [];
+    var it = DriveApp.getFilesByName("Aanmeldingen jeugdviscursus");
+    while (it.hasNext()) {
+      var f = it.next();
+      if (f.getMimeType() === MimeType.GOOGLE_SHEETS) {
+        kandidaten.push(f);
+      }
     }
+    if (kandidaten.length === 0) {
+      throw new Error("spreadsheet 'Aanmeldingen jeugdviscursus' niet gevonden");
+    }
+    bestand = SpreadsheetApp.openById(kandidaten[0].getId());
   }
-  if (kandidaten.length === 0) {
-    throw new Error("spreadsheet 'Aanmeldingen jeugdviscursus' niet gevonden");
-  }
-  var bestand = SpreadsheetApp.openById(kandidaten[0].getId());
   var blad = bestand.getSheetByName("Aanmeldingen") ||
              bestand.insertSheet("Aanmeldingen");
-  return { blad: blad, bestandId: kandidaten[0].getId() };
+  return { blad: blad, bestandId: bestand.getId() };
 }
 
 function datumAlsTekst(w) {
