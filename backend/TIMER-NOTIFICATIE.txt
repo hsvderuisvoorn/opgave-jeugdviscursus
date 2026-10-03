@@ -183,9 +183,10 @@ function maakBevestiging(kind) {
     "",
     "Deze bevestigingsmail is verzonden vanuit deruisvoornhelden@gmail.com.",
     "",
-    "Wilt u op deze mail antwoorden, doe dit dan naar secretariaat@hsvderuisvoorn.nl. Antwoorden naar deruisvoornhelden@gmail.com worden niet gelezen door het secretariaat.",
+    "Wilt u op deze mail antwoorden doe dit dan naar secretariaat@hsvderuisvoorn.nl",
+    "Antwoorden naar deruisvoornhelden@gmail.com zullen niet worden gelezen door het secretariaat.",
     "",
-    "Let op: mail van HSV De Ruisvoorn kan soms in uw spam-map terechtkomen.",
+    "Let op: Mail van HSV de Ruisvoorn kan in uw spam map terecht komen",
     "",
     "Met vriendelijke groet,",
     "HSV De Ruisvoorn"
