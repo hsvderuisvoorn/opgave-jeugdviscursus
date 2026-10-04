@@ -184,6 +184,7 @@ function maakBevestiging(kind) {
     "Zodra alle opgaves verwerkt zijn, hoort u van ons of de deelname is bevestigd. ",
     "",
     "Heeft u nog vragen stuur die dan naar secretariaat@hsvderuisvoorn.nl en niet als antwoord op deze mail. De mailbox deruisvoornhelden@gmail.com wordt niet gelezen.",
+    "Deze mail kan soms in uw spam-map terechtkomen.",
     "",
     "Met vriendelijke groet,",
     "HSV De Ruisvoorn"
