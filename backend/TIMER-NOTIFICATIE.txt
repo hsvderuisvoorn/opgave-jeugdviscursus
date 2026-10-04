@@ -186,7 +186,7 @@ function maakBevestiging(kind) {
     "Wilt u op deze mail antwoorden doe dit dan naar secretariaat@hsvderuisvoorn.nl",
     "Antwoorden naar deruisvoornhelden@gmail.com zullen niet worden gelezen door het secretariaat.",
     "",
-    "Let op: Mail van HSV de Ruisvoorn kan in uw spam map terecht komen",
+    "Let op: Mail van HSV de Ruisvoorn kan in uw spam map tercht komen",
     "",
     "Met vriendelijke groet,",
     "HSV De Ruisvoorn"
