@@ -6,12 +6,12 @@
    zodra de app voor het eerst geladen wordt. Bij elke wijziging
    van de bestanden deze CACHE-NAAM opvoeren (nieuwe versie).
 
-   CACHE-NAAM: v21-20261003
+   CACHE-NAAM: v22-20261003
    ============================================================ */
 
 "use strict";
 
-var CACHE_NAAM = "opgave-jeugdviscursus-v21";
+var CACHE_NAAM = "opgave-jeugdviscursus-v22";
 
 var PRECACHE = [
   "./",
